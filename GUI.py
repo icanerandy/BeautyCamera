@@ -45,8 +45,11 @@ class Ui_MainWindow(object):
         self.action_O.setObjectName("action_O")
         self.action_S = QtWidgets.QAction(MainWindow)
         self.action_S.setObjectName("action_S")
+        self.action_F = QtWidgets.QAction(MainWindow)
+        self.action_F.setObjectName("action_F")
         self.menu_F.addAction(self.action_O)
         self.menu_F.addAction(self.action_S)
+        self.menu_F.addAction(self.action_F)
         self.menubar.addAction(self.menu_F.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -61,3 +64,5 @@ class Ui_MainWindow(object):
         self.action_O.setShortcut(_translate("MainWindow", "Ctrl+O"))
         self.action_S.setText(_translate("MainWindow", "保存图片"))
         self.action_S.setShortcut(_translate("MainWindow", "Ctrl+S"))
+        self.action_F.setText(_translate("MainWindow", "实时相机"))
+        self.action_F.setShortcut(_translate("MainWindow", "Ctrl+F"))
