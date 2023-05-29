@@ -29,7 +29,20 @@
          </font>
         </property>
         <property name="text">
-         <string>TextLabel</string>
+         <string>Src</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <family>AniMe Matrix - MB_EN</family>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>DES</string>
         </property>
        </widget>
       </item>
