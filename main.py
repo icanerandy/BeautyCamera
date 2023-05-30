@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         # 得到图片文件名
         if len(img_name) != 0:
             self.image = cv2.imread(img_name)
-            self.res_image = self.image
+            self.res_image = self.image.copy()
             self.face_detect()
             self.show_image()
 
@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         cv2.imwrite(img_name, self.res_image)
 
     def show_image(self):
-        img = self.res_image
+        img = self.image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
         scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(), aspectRatioMode=Qt.KeepAspectRatio)
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
         if idx == 0:    # 美白
             self.brightening = degree
             self.get_skin_mask()
-            self.face_brightening()
+            self.whitening()
             self.show_image()
         elif idx == 1:  # 磨皮
             self.smooth = degree
@@ -194,17 +194,16 @@ class MainWindow(QMainWindow):
             self.show_image()
         elif idx == 5:  # 浓眉
             self.eyebrow = degree
-
             self.show_image()
 
     def process_image(self):
-        self.res_image = self.image
+        self.res_image = self.image.copy()
 
         # 美白
         if self.brightening != 0:
             self.face_detect()
             self.get_skin_mask()
-            self.face_brightening()
+            self.whitening()
         # 磨皮
         elif self.smooth != 0:
             self.face_detect()
@@ -231,35 +230,14 @@ class MainWindow(QMainWindow):
             self.get_skin_mask()
             pass
 
-    def face_brightening(self):
-        img = self.res_image
-        # 设定一个当前图像的副本imgw，并且在美白算法中存储更新后的像素值
-        imgw = np.zeros(img.shape, dtype='uint8')
-        imgw = img.copy()
-        # 设定一个mitones数组，来计算美白算法中的中间调增益，该数组中每个元素都对应一种亮度值
-        midtones_add = np.zeros(256)
-
-        for i in range(256):
-            midtones_add[i] = 0.667 * (1 - ((i - 127.0) / 127) * ((i - 127.0) / 127))
-
-        lookup = np.zeros(256, dtype="uint8")
-
-        for i in range(256):
-            red = i
-            red += np.uint8(self.brightening * midtones_add[red])
-            red = max(0, min(0xff, red))
-            lookup[i] = np.uint8(red)
-
-        rows, cols, channals = img.shape
-        for r in range(rows):
-            for c in range(cols):
-                # 进行皮肤识别 对于图像中被识别为皮肤的像素点 将其RGB值通过查找表进行修改从而达到美白的效果
-                if self.skin_mask[r, c, 0] == 1:
-                    # 如果当前像素点的红色通道值为1 就将RGB三个通道的值通过查找表lookup进行修改
-                    imgw[r, c, 0] = lookup[imgw[r, c, 0]]
-                    imgw[r, c, 1] = lookup[imgw[r, c, 1]]
-                    imgw[r, c, 2] = lookup[imgw[r, c, 2]]
-        self.res_image = imgw
+    def whitening(self):
+        im_bgr = self.res_image
+        im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
+        im_hsv[:, :, -1] = np.minimum(
+            im_hsv[:, :, -1] + im_hsv[:, :, -1] * self.skin_mask[:, :, -1] * self.brightening / 100, 255).astype(
+            'uint8')
+        im_bgr[:] = cv2.cvtColor(im_hsv, cv2.COLOR_HSV2BGR)[:]
+        self.res_image = im_bgr
 
     def dermabrasion(self):
         value1 = self.smooth
@@ -401,7 +379,7 @@ class MainWindow(QMainWindow):
 
         # 创建蒙板
         mask = np.zeros((h, w), dtype=np.uint8)
-        cv2.circle(mask, pt_C, np.int32(R), 255, cv2.FILLED)
+        cv2.circle(mask, tuple(pt_C), np.int32(R), 255, cv2.FILLED)
 
         pt_C = np.float32(pt_C)
 
@@ -438,10 +416,10 @@ class MainWindow(QMainWindow):
             y1 = int(uy)
             y2 = y1 + 1
 
-            part1 = src[y1, x1].astype(np.float) * (float(x2) - ux) * (float(y2) - uy)
-            part2 = src[y1, x2].astype(np.float) * (ux - float(x1)) * (float(y2) - uy)
-            part3 = src[y2, x1].astype(np.float) * (float(x2) - ux) * (uy - float(y1))
-            part4 = src[y2, x2].astype(np.float) * \
+            part1 = src[y1, x1].astype(float) * (float(x2) - ux) * (float(y2) - uy)
+            part2 = src[y1, x2].astype(float) * (ux - float(x1)) * (float(y2) - uy)
+            part3 = src[y2, x1].astype(float) * (float(x2) - ux) * (uy - float(y1))
+            part4 = src[y2, x2].astype(float) * \
                     (ux - float(x1)) * (uy - float(y1))
 
             insertValue = part1 + part2 + part3 + part4
