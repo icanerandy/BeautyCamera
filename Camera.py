@@ -55,9 +55,9 @@ class Camera(QThread):
                 shape = predictor(self.frame, face)
                 self.land_mask = np.matrix([[p.x, p.y] for p in shape.parts()])
                 # 遍历所有点，打印出其坐标，并圈出来
-                for pt in shape.parts():
-                    pt_pos = (pt.x, pt.y)
-                    cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
+                # for pt in shape.parts():
+                #     pt_pos = (pt.x, pt.y)
+                #     cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
 
             # 对图像进行编码
             json_object = self.encoder(self.frame)
