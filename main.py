@@ -22,10 +22,9 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.ui = None
-        self.cam_view = None
         self.image = None
+        self.img_json = None
         self.res_image = None
-        self.cam_idx = 0
 
         # 初始化ui
         self.init_ui()
@@ -76,17 +75,7 @@ class MainWindow(QMainWindow):
     def view_camera(self, img_json):
         self.img_json = img_json
         self.image = self.decoder(self.img_json)
-        img = self.image
-        frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
-        pix = QPixmap.fromImage(frame)
-        self.ui.label.setPixmap(QPixmap(pix))
-
-    def encoder(self, img):
-        retval, buffer = cv2.imencode('.jpg', img)
-        jpg_as_bytes = base64.b64encode(buffer)
-        jpg_as_str = jpg_as_bytes.decode('ascii')
-        json_object = json.dumps({'img_str': jpg_as_str})
-        return json_object
+        self.show_image()
 
     def decoder(self, img_json):
         jpg_as_str = json.loads(img_json)['img_str']
