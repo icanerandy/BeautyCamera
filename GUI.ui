@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>759</width>
+    <height>628</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1200</width>
+    <height>800</height>
+   </size>
   </property>
   <property name="cursor">
    <cursorShape>ArrowCursor</cursorShape>
@@ -55,7 +61,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>759</width>
      <height>23</height>
     </rect>
    </property>

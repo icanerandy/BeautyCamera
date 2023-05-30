@@ -69,25 +69,28 @@ class MainWindow(QMainWindow):
         # 弹出来的显示图片的窗口会随着图片尺寸大小的变化而变化
         img_name, _ = QFileDialog.getOpenFileName(None, '打开文件', '.', '图片文件 (*.png, *.jpg)')
         # 得到图片文件名
-        self.image = cv2.imread(img_name)
-        self.res_image = self.image
-        self.face_detect()
-        self.show_image()
+        if len(img_name) != 0:
+            self.image = cv2.imread(img_name)
+            self.res_image = self.image
+            self.face_detect()
+            self.show_image()
 
     def save_image(self):
-        img_name, _ = QFileDialog.getSaveFileName(None, '打开文件', '.', '图片文件 (*.png, *.jpg)')
+        img_name, _ = QFileDialog.getSaveFileName(self, '打开文件', './', '图片文件 (*.png *.xpm *.jpg)')
         cv2.imwrite(img_name, self.res_image)
 
     def show_image(self):
-        img = self.image
+        img = self.res_image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
-        self.ui.label.setPixmap(QPixmap(pix))
+        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(), aspectRatioMode=Qt.KeepAspectRatio)
+        self.ui.label.setPixmap(scaredPixmap)
 
         img = self.res_image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
-        self.ui.label_2.setPixmap(QPixmap(pix))
+        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(), aspectRatioMode=Qt.KeepAspectRatio)
+        self.ui.label_2.setPixmap(scaredPixmap)
 
     def open_camera(self):
         # 执行线程的run方法
