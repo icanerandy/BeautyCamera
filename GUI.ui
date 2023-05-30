@@ -67,7 +67,14 @@
     <addaction name="action_S"/>
     <addaction name="action_F"/>
    </widget>
+   <widget class="QMenu" name="menu_P">
+    <property name="title">
+     <string>图像处理(&amp;P)</string>
+    </property>
+    <addaction name="action_P"/>
+   </widget>
    <addaction name="menu_F"/>
+   <addaction name="menu_P"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_O">
@@ -92,6 +99,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="action_P">
+   <property name="text">
+    <string>美颜 &amp;&amp; 美型</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

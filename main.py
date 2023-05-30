@@ -12,16 +12,19 @@ from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import *
 
 from Camera import Camera
+from ProcessUI import ProcessWindow
 
 
 class MainWindow(QMainWindow):
     # 子线程返回摄像头图像到主线程的信号
     open_cam_complete_signal = pyqtSignal(str)
+    slider_change_signal = pyqtSignal(int, int)
 
     def __init__(self):
         super().__init__(None)
 
         self.ui = None
+        self.process_ui = None
         self.image = None
         self.img_json = None
         self.res_image = None
@@ -42,9 +45,13 @@ class MainWindow(QMainWindow):
         self.ui.action_O.triggered.connect(self.load_image)
         self.ui.action_S.triggered.connect(self.save_image)
         self.ui.action_F.triggered.connect(self.open_camera)
+        self.ui.action_P.triggered.connect(self.process_dlg)
 
         # 返回主线程的信号
         self.open_cam_complete_signal.connect(self.view_camera)
+
+        # 滑块
+        self.slider_change_signal.connect(self.slider_change)
 
     def load_image(self):
         self.camera_thread.terminate_cam_signal.emit()
@@ -104,6 +111,41 @@ class MainWindow(QMainWindow):
             for pt in shape.parts():
                 pt_pos = (pt.x, pt.y)
                 cv2.circle(self.image, pt_pos, 2, (0, 255, 0), 1)
+
+    def process_dlg(self):
+        dlg = ProcessWindow(self.slider_change_signal)
+        # 展示窗口
+        dlg.show()
+
+    def slider_change(self, idx, degree):
+        if idx == 0:    # 美白
+            pass
+
+        elif idx == 1:  # 磨皮
+            pass
+
+        elif idx == 2:  # 瘦脸
+            pass
+
+        elif idx == 3:  # 大眼
+            pass
+
+        elif idx == 4:  # 嘴巴
+            pass
+
+        elif idx == 5:  # 浓眉
+            pass
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, '提示',
+                                     "是否要关闭所有窗口?",
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            event.accept()
+            sys.exit(0)  # 退出程序
+        else:
+            event.ignore()
 
 
 if __name__ == "__main__":
