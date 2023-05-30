@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
     open_cam_complete_signal = pyqtSignal(str)
 
     def __init__(self):
-        super().__init__()
+        super().__init__(None)
 
         self.ui = None
         self.image = None
