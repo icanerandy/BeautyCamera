@@ -1,6 +1,7 @@
 import base64
 import json
 
+import numpy as np
 import cv2
 import dlib
 from PyQt5.QtCore import *
@@ -18,6 +19,7 @@ class Camera(QThread):
         self.terminate_cam_signal.connect(self.terminate)
         self.open_cam_complete_signal = main_signal
 
+        self.land_mask = None
         self.frame = None
 
     def encoder(self, img):
@@ -34,7 +36,7 @@ class Camera(QThread):
         detector = dlib.get_frontal_face_detector()
         # 获取人脸检测器
         predictor = dlib.shape_predictor(
-            './trainner/shape_predictor_68_face_landmarks.dat'
+            './trainner/models_shape_predictor_81_face_landmarks.dat'
         )
 
         # 将json字符串转换
@@ -49,8 +51,9 @@ class Camera(QThread):
 
             dets = detector(gray, 1)
             for face in dets:
-                # 寻找人脸的68个标定点
+                # 寻找人脸的81个标定点
                 shape = predictor(self.frame, face)
+                self.land_mask = np.matrix([[p.x, p.y] for p in shape.parts()])
                 # 遍历所有点，打印出其坐标，并圈出来
                 for pt in shape.parts():
                     pt_pos = (pt.x, pt.y)
@@ -58,9 +61,10 @@ class Camera(QThread):
 
             # 对图像进行编码
             json_object = self.encoder(self.frame)
-            # 发送编码到主线程
-            self.open_cam_complete_signal.emit(json_object)
-            cv2.waitKey(int(1 / fps) * 1000)
+            # 发送编码和掩膜到主线程
+            if self.land_mask is not None:
+                self.open_cam_complete_signal.emit(json_object, self.land_mask)
+            # cv2.waitKey(int(1 / fps) * 1000)
 
     def terminate(self):
         self.is_running = False
