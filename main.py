@@ -24,6 +24,8 @@ right_brow = list(range(17, 22))
 mouth = list(range(48, 61))
 nose = list(range(27, 35))
 
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor("./trainner/shape_predictor_68_face_landmarks.dat")
 
 class MainWindow(QMainWindow):
     # 子线程返回摄像头图像到主线程的信号
@@ -94,7 +96,7 @@ class MainWindow(QMainWindow):
         cv2.imwrite(img_name, self.res_image)
 
     def show_image(self):
-        img = self.image
+        img = self.res_image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
         self.ui.label.setPixmap(QPixmap(pix))
@@ -142,9 +144,9 @@ class MainWindow(QMainWindow):
             shape = predictor(self.image, face)
             self.land_mask = np.matrix([[p.x, p.y] for p in shape.parts()])
             # 遍历所有点，打印出其坐标，并圈出来
-            # for pt in shape.parts():
-            #     pt_pos = (pt.x, pt.y)
-            #     cv2.circle(self.res_image, pt_pos, 2, (0, 255, 0), 1)
+            for pt in shape.parts():
+                pt_pos = (pt.x, pt.y)
+                cv2.circle(self.res_image, pt_pos, 2, (0, 255, 0), 1)
 
     def draw_convex_hull(self, mask, points, color):
         hull = cv2.convexHull(points)
@@ -185,7 +187,7 @@ class MainWindow(QMainWindow):
             self.show_image()
         elif idx == 4:  # 嘴巴
             self.mouth = degree
-
+            self.mouth_makeup()
             self.show_image()
         elif idx == 5:  # 浓眉
             self.eyebrow = degree
@@ -194,32 +196,35 @@ class MainWindow(QMainWindow):
 
     def process_image(self):
         self.res_image = self.image
-        self.face_detect()
 
         # 美白
         if self.brightening != 0:
+            self.face_detect()
             self.get_skin_mask()
             self.face_brightening()
         # 磨皮
         elif self.smooth != 0:
+            self.face_detect()
             self.get_skin_mask()
             self.dermabrasion()
         # 瘦脸
         elif self.face != 0:
+            self.face_detect()
             self.get_skin_mask()
             self.face_thin_auto()
-            pass
         # 大眼
         elif self.eye != 0:
+            self.face_detect()
             self.get_skin_mask()
             self.eyes_change_auto()
-            pass
         # 微笑嘴巴
         elif self.mouth != 0:
+            self.face_detect()
             self.get_skin_mask()
-            pass
+            self.mouth_makeup()
         # 眉毛
         elif self.eyebrow != 0:
+            self.face_detect()
             self.get_skin_mask()
             pass
 
@@ -439,6 +444,43 @@ class MainWindow(QMainWindow):
             insertValue = part1 + part2 + part3 + part4
 
             return insertValue.astype(np.int8)
+
+    def createBox(self, points, scale=5, masked=False, cropped=True):
+        if masked:
+            mask = np.zeros_like(self.res_image)
+            mask = cv2.fillPoly(mask, [points], (255, 255, 255))
+            img = cv2.bitwise_and(self.res_image, mask)
+
+        if cropped:
+            bbox = cv2.boundingRect(points)
+            x, y, w, h = bbox
+            imgCrop = self.res_image[y:y + h, x:x + w]
+            imgCrop = cv2.resize(imgCrop, (0, 0), None, scale, scale)
+            return imgCrop
+        else:
+            return mask
+
+    def mouth_makeup(self):
+        imgOriginal = self.res_image.copy()
+        imgGray = cv2.cvtColor(self.res_image, cv2.COLOR_BGR2GRAY)
+
+        landmarks = np.array(self.land_mask)
+        myPoints = []
+        for n in range(81):
+            x = landmarks[n][0]
+            y = landmarks[n][1]
+            myPoints.append([x, y])
+        myPoints = np.array(myPoints)
+        imgLips = self.createBox(myPoints[48:61], 8, masked=True, cropped=False)
+        imgColorLips = np.zeros_like(imgLips)
+        b = 0
+        g = 0
+        r = self.mouth * 5
+        imgColorLips[:] = b, g, r
+        imgColorLips = cv2.bitwise_and(imgLips, imgColorLips)
+        imgColorLips = cv2.GaussianBlur(imgColorLips, (7, 7), 10)
+        imgColorLips = cv2.addWeighted(imgOriginal, 1, imgColorLips, 0.4, 0)
+        self.res_image = imgColorLips
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '提示',

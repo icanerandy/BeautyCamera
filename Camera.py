@@ -55,14 +55,15 @@ class Camera(QThread):
                 shape = predictor(self.frame, face)
                 self.land_mask = np.matrix([[p.x, p.y] for p in shape.parts()])
                 # 遍历所有点，打印出其坐标，并圈出来
-                # for pt in shape.parts():
-                #     pt_pos = (pt.x, pt.y)
-                #     cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
+                for pt in shape.parts():
+                    pt_pos = (pt.x, pt.y)
+                    cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
 
             # 对图像进行编码
             json_object = self.encoder(self.frame)
             # 发送编码和掩膜到主线程
-            self.open_cam_complete_signal.emit(json_object, self.land_mask)
+            if self.land_mask is not None:
+                self.open_cam_complete_signal.emit(json_object, self.land_mask)
             # cv2.waitKey(int(1 / fps) * 1000)
 
     def terminate(self):
