@@ -29,6 +29,14 @@ class MainWindow(QMainWindow):
         self.img_json = None
         self.res_image = None
 
+        # 滑块
+        self.brightening = 0  # 美白
+        self.smooth = 0       # 磨皮
+        self.face = 0         # 脸型
+        self.eye = 0          # 眼睛
+        self.mouth = 0        # 嘴巴
+        self.eyebrow = 0      # 眉毛
+
         # 初始化ui
         self.init_ui()
         # 绑定槽函数
@@ -62,6 +70,7 @@ class MainWindow(QMainWindow):
         img_name, _ = QFileDialog.getOpenFileName(None, '打开文件', '.', '图片文件 (*.png, *.jpg)')
         # 得到图片文件名
         self.image = cv2.imread(img_name)
+        self.res_image = self.image
         self.face_detect()
         self.show_image()
 
@@ -75,13 +84,21 @@ class MainWindow(QMainWindow):
         pix = QPixmap.fromImage(frame)
         self.ui.label.setPixmap(QPixmap(pix))
 
+        img = self.res_image
+        frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
+        pix = QPixmap.fromImage(frame)
+        self.ui.label_2.setPixmap(QPixmap(pix))
+
     def open_camera(self):
         # 执行线程的run方法
         self.camera_thread.start()
 
     def view_camera(self, img_json):
         self.img_json = img_json
+        # 图像解码
         self.image = self.decoder(self.img_json)
+        # 视频每一帧进行处理
+        self.process_image()
         self.show_image()
 
     def decoder(self, img_json):
@@ -119,21 +136,47 @@ class MainWindow(QMainWindow):
 
     def slider_change(self, idx, degree):
         if idx == 0:    # 美白
-            pass
-
+            self.brightening = degree
+            self.process_image()
+            self.show_image()
         elif idx == 1:  # 磨皮
-            pass
-
+            self.smooth = degree
+            self.process_image()
+            self.show_image()
         elif idx == 2:  # 瘦脸
-            pass
-
+            self.face = degree
+            self.process_image()
+            self.show_image()
         elif idx == 3:  # 大眼
-            pass
-
+            self.eye = degree
+            self.process_image()
+            self.show_image()
         elif idx == 4:  # 嘴巴
+            self.mouth = degree
+            self.process_image()
+            self.show_image()
+        elif idx == 5:  # 浓眉
+            self.eyebrow = degree
+            self.process_image()
+            self.show_image()
+
+    def process_image(self):
+        if self.brightening != 0:
             pass
 
-        elif idx == 5:  # 浓眉
+        elif self.smooth != 0:
+            pass
+
+        elif self.face != 0:
+            pass
+
+        elif self.eye != 0:
+            pass
+
+        elif self.mouth != 0:
+            pass
+
+        elif self.eyebrow != 0:
             pass
 
     def closeEvent(self, event):
