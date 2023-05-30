@@ -210,6 +210,7 @@ class MainWindow(QMainWindow):
         elif self.mouth != 0:
             self.get_skin_mask()
             pass
+        # 眉毛
         elif self.eyebrow != 0:
             self.get_skin_mask()
             pass
@@ -243,6 +244,32 @@ class MainWindow(QMainWindow):
                     imgw[r, c, 1] = lookup[imgw[r, c, 1]]
                     imgw[r, c, 2] = lookup[imgw[r, c, 2]]
         self.res_image = imgw
+
+    def dermabrasion(self):
+        value1 = self.smooth
+        value2 = 10
+        if value1 == 0 and value2 == 0:
+            return 0
+        if value2 == 0:
+            value2 = 2
+        if value1 == 0:
+            value1 = 3
+        img = self.image
+        # dx和fc分别为双边滤波器的空间和灰度值的标准差
+        dx = value1 * 5
+        fc = value1 * 12.5
+        p = 50
+        # 通过bilateralFilter和GaussianBlur对图像进行滤波处理
+        temp1 = cv2.bilateralFilter(img, dx, fc, fc)
+        temp2 = (temp1 - img + 128)
+        temp3 = cv2.GaussianBlur(temp2, (2 * value2 - 1, 2 * value2 - 1), 0, 0)
+        temp4 = img + 2 * temp3 - 255
+        dst = np.uint8(img * ((100 - p) / 100) + temp4 * (p / 100))
+
+        imgskin_c = np.uint8(-(self.skin_mask - 1))
+
+        dst = np.uint8(dst * self.skin_mask + img * imgskin_c)
+        self.res_image = dst
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '提示',
