@@ -42,9 +42,17 @@ class Camera(QThread):
         # 将json字符串转换
         cam_index = json.loads("0")  # 0
         cap = cv2.VideoCapture(cam_index)
+        # fps = 30
         fps = cap.get(cv2.CAP_PROP_FPS)
         while self.is_running:
             ret, self.frame = cap.read()
+
+            # 降低分辨率
+            # scale_percent = 50  # percent of original size
+            # new_width = int(self.frame.shape[1] * scale_percent / 100)
+            # new_height = int(self.frame.shape[0] * scale_percent / 100)
+            # # Resize image
+            # self.frame = cv2.resize(self.frame, (new_width, new_height), interpolation=cv2.INTER_AREA)
 
             # 将图像转为灰度图像
             gray = cv2.cvtColor(self.frame, cv2.COLOR_BGRA2GRAY)
@@ -55,9 +63,9 @@ class Camera(QThread):
                 shape = predictor(self.frame, face)
                 self.land_mask = np.matrix([[p.x, p.y] for p in shape.parts()])
                 # 遍历所有点，打印出其坐标，并圈出来
-                for pt in shape.parts():
-                    pt_pos = (pt.x, pt.y)
-                    cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
+                # for pt in shape.parts():
+                #     pt_pos = (pt.x, pt.y)
+                #     cv2.circle(self.frame, pt_pos, 2, (0, 255, 0), 1)
 
             # 对图像进行编码
             json_object = self.encoder(self.frame)

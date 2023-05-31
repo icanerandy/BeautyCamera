@@ -79,8 +79,15 @@
     </property>
     <addaction name="action_P"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>还原操作(&amp;R)</string>
+    </property>
+    <addaction name="action_R"/>
+   </widget>
    <addaction name="menu_F"/>
    <addaction name="menu_P"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_O">
@@ -113,6 +120,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="action_R">
+   <property name="text">
+    <string>一键还原</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

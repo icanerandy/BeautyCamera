@@ -1,8 +1,12 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 
 class ProcessWindow(QDialog):
+    # 滑块初始化信号
+    slider_init_signal = pyqtSignal()
+
     def __init__(self, main_signal):
         super().__init__(None)
 
@@ -27,19 +31,35 @@ class ProcessWindow(QDialog):
         self.ui = uic.loadUi('./process_UI.ui', self)
 
     def action_connect(self):
-        # 美白度
-        self.ui.horizontalSlider.valueChanged.connect(self.slider_change)
-        # 磨皮程度
-        self.ui.horizontalSlider_2.valueChanged.connect(self.slider_change)
+        # 绑定信号
+        self.slider_init_signal.connect(self.init_value)
 
+        # 美白度
+        self.ui.horizontalSlider.sliderReleased.connect(self.slider_change)
+        # 磨皮程度
+        self.ui.horizontalSlider_2.sliderReleased.connect(self.slider_change)
         # 脸型
-        self.ui.horizontalSlider_6.valueChanged.connect(self.slider_change)
+        self.ui.horizontalSlider_6.sliderReleased.connect(self.slider_change)
         # 眼睛
-        self.ui.horizontalSlider_7.valueChanged.connect(self.slider_change)
+        self.ui.horizontalSlider_7.sliderReleased.connect(self.slider_change)
         # 嘴巴
-        self.ui.horizontalSlider_8.valueChanged.connect(self.slider_change)
+        self.ui.horizontalSlider_8.sliderReleased.connect(self.slider_change)
         # 眉毛
-        self.ui.horizontalSlider_9.valueChanged.connect(self.slider_change)
+        self.ui.horizontalSlider_9.sliderReleased.connect(self.slider_change)
+
+    def init_value(self):
+        # 美白度
+        self.ui.horizontalSlider.setValue(0)
+        # 磨皮程度
+        self.ui.horizontalSlider_2.setValue(0)
+        # 脸型
+        self.ui.horizontalSlider_6.setValue(0)
+        # 眼睛
+        self.ui.horizontalSlider_7.setValue(0)
+        # 嘴巴
+        self.ui.horizontalSlider_8.setValue(0)
+        # 眉毛
+        self.ui.horizontalSlider_9.setValue(0)
 
     def slider_change(self):
         if self.brightening != self.ui.horizontalSlider.value():

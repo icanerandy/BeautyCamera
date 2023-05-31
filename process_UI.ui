@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>美化处理</string>
+       <string>滤镜</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="1">
@@ -174,7 +174,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>美型处理</string>
+       <string>五官处理</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="1">
