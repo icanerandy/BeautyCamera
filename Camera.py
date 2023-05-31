@@ -1,6 +1,9 @@
 import base64
 import json
 
+import sys
+import os
+
 import numpy as np
 import cv2
 import dlib
@@ -36,11 +39,11 @@ class Camera(QThread):
         detector = dlib.get_frontal_face_detector()
         # 获取人脸检测器
         predictor = dlib.shape_predictor(
-            './trainner/models_shape_predictor_81_face_landmarks.dat'
+            resource_path('models_shape_predictor_81_face_landmarks.dat')
         )
 
         # 将json字符串转换
-        cam_index = json.loads("0")  # 0
+        cam_index = json.loads("0")
         cap = cv2.VideoCapture(cam_index)
         # fps = 30
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -77,3 +80,13 @@ class Camera(QThread):
     def terminate(self):
         self.is_running = False
 
+
+def resource_path(relative_path):
+    """获取程序中所需文件资源的绝对路径"""
+    try:
+        # PyInstaller创建临时文件夹,将路径存储于_MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)

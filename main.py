@@ -1,6 +1,6 @@
 import base64
 import json
-import math
+import os
 import sys
 
 import cv2
@@ -18,17 +18,13 @@ from Camera import Camera
 from ProcessUI import ProcessWindow
 from ImageProcessor import ImageProcessor
 
-
-jaw_point = list(range(0, 17)) + list(range(68,81))
+jaw_point = list(range(0, 17)) + list(range(68, 81))
 left_eye = list(range(42, 48))
 right_eye = list(range(36, 42))
 left_brow = list(range(22, 27))
 right_brow = list(range(17, 22))
 mouth = list(range(48, 61))
 nose = list(range(27, 35))
-
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("./trainner/shape_predictor_68_face_landmarks.dat")
 
 class MainWindow(QMainWindow):
     # 子线程返回摄像头图像到主线程的信号
@@ -66,11 +62,11 @@ class MainWindow(QMainWindow):
 
         # 滑块
         self.whitening_rate = 0  # 美白
-        self.smooth_rate = 0       # 磨皮
-        self.slim_rate = 0         # 脸型
-        self.big_eye_rate = 0          # 眼睛
-        self.mouth_rate = 0        # 嘴巴
-        self.eyebrow_rate = 0      # 眉毛
+        self.smooth_rate = 0  # 磨皮
+        self.slim_rate = 0  # 脸型
+        self.big_eye_rate = 0  # 眼睛
+        self.mouth_rate = 0  # 嘴巴
+        self.eyebrow_rate = 0  # 眉毛
 
         # 初始化ui
         self.init_ui()
@@ -84,19 +80,19 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         # 加载由Qt Designer设计的ui文件
-        self.ui = uic.loadUi('./GUI.ui', self)
+        self.ui = uic.loadUi(resource_path('GUI.ui'), self)
 
     def init_value(self):
         self.slider_init_signal.emit()
         self.res_image = self.image
         self.show_image()
 
-        self.whitening_rate = 0    # 美白
-        self.smooth_rate = 0       # 磨皮
-        self.slim_rate = 0         # 脸型
-        self.big_eye_rate = 0      # 眼睛
-        self.mouth_rate = 0        # 嘴巴
-        self.eyebrow_rate = 0      # 眉毛
+        self.whitening_rate = 0  # 美白
+        self.smooth_rate = 0  # 磨皮
+        self.slim_rate = 0  # 脸型
+        self.big_eye_rate = 0  # 眼睛
+        self.mouth_rate = 0  # 嘴巴
+        self.eyebrow_rate = 0  # 眉毛
 
     def action_connect(self):
         self.ui.action_O.triggered.connect(self.load_image)
@@ -135,13 +131,15 @@ class MainWindow(QMainWindow):
         img = self.image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
-        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(), aspectRatioMode=Qt.KeepAspectRatio)
+        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(),
+                                  aspectRatioMode=Qt.KeepAspectRatio)
         self.ui.label.setPixmap(scaredPixmap)
 
         img = self.res_image
         frame = QImage(img, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGB888).rgbSwapped()
         pix = QPixmap.fromImage(frame)
-        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(), aspectRatioMode=Qt.KeepAspectRatio)
+        scaredPixmap = pix.scaled(self.ui.centralwidget.width(), self.ui.centralwidget.height(),
+                                  aspectRatioMode=Qt.KeepAspectRatio)
         self.ui.label_2.setPixmap(scaredPixmap)
 
     def open_camera(self):
@@ -174,7 +172,7 @@ class MainWindow(QMainWindow):
         detector = dlib.get_frontal_face_detector()
         # 获取人脸检测器
         predictor = dlib.shape_predictor(
-            './trainner/models_shape_predictor_81_face_landmarks.dat'
+            resource_path('models_shape_predictor_81_face_landmarks.dat')
         )
 
         dets = detector(gray, 1)
@@ -239,7 +237,7 @@ class MainWindow(QMainWindow):
         dlg.exec_()
 
     def slider_change(self, idx, rate):
-        if idx == 0:    # 美白
+        if idx == 0:  # 美白
             self.whitening_rate = rate
         elif idx == 1:  # 磨皮
             self.smooth_rate = rate
@@ -298,6 +296,17 @@ class MainWindow(QMainWindow):
             sys.exit(0)  # 退出程序
         else:
             event.ignore()
+
+
+def resource_path(relative_path):
+    """获取程序中所需文件资源的绝对路径"""
+    try:
+        # PyInstaller创建临时文件夹,将路径存储于_MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 
 if __name__ == "__main__":

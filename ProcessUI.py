@@ -1,3 +1,6 @@
+import sys
+import os
+
 from PyQt5 import uic
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -28,7 +31,7 @@ class ProcessWindow(QDialog):
 
     def init_ui(self):
         # 加载由Qt Designer设计的ui文件
-        self.ui = uic.loadUi('./process_UI.ui', self)
+        self.ui = uic.loadUi(resource_path('process_UI.ui'), self)
 
     def action_connect(self):
         # 绑定信号
@@ -91,3 +94,13 @@ class ProcessWindow(QDialog):
             self.eyebrow = self.ui.horizontalSlider_9.value()
             print('浓眉程度：', self.ui.horizontalSlider_9.value())
             self.slider_change_signal.emit(5, self.eyebrow)
+
+def resource_path(relative_path):
+    """获取程序中所需文件资源的绝对路径"""
+    try:
+        # PyInstaller创建临时文件夹,将路径存储于_MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
